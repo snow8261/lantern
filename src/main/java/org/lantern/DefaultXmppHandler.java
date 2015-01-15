@@ -87,6 +87,7 @@ public class DefaultXmppHandler implements XmppHandler {
 
     static {
         SmackConfiguration.setPacketReplyTimeout(60 * 1000);
+        SmackConfiguration.setKeepAliveInterval(5 * 1000);
     }
 
     private volatile long lastInfoMessageScheduled = 0L;
@@ -698,7 +699,9 @@ public class DefaultXmppHandler implements XmppHandler {
         else {
             LOG.info("Removing JID for peer '" + from);
             try {
-                this.networkTracker.instanceOffline(from, new URI(from));
+                String advertisingUser = LanternXmppUtils.jidToEmail(from);
+                this.networkTracker.instanceOffline(advertisingUser, new URI(
+                        from));
             } catch (URISyntaxException e) {
                 LOG.error("Unable to parse JabberID: {}", from, e);
             }
@@ -791,8 +794,6 @@ public class DefaultXmppHandler implements XmppHandler {
 
         //final String mac = (String) msg.getProperty(P2PConstants.MAC);
         final String base64Cert = (String) msg.getProperty(P2PConstants.CERT);
-
-        LOG.debug("Base 64 cert: {}", base64Cert);
 
         if (StringUtils.isNotBlank(base64Cert)) {
             LOG.trace("Got certificate for {}:\n{}", uri, 
@@ -918,7 +919,7 @@ public class DefaultXmppHandler implements XmppHandler {
         if (!LanternXmppUtils.isLanternJid(from)) {
             return;
         }
-        final String email = XmppUtils.jidToUser(from);
+        final String email = LanternXmppUtils.jidToEmail(from);
         final ClientFriend friend = this.friendsHandler.getFriend(email);
         if (friend == null) {
             // Some error occurred!
@@ -937,7 +938,7 @@ public class DefaultXmppHandler implements XmppHandler {
             return;
         }
         LOG.debug("Got peer available...");
-        final String email = XmppUtils.jidToUser(from);
+        final String email = LanternXmppUtils.jidToEmail(from);
         this.friendsHandler.peerRunningLantern(email, pres);
 
     }

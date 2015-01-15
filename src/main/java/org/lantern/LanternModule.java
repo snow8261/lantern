@@ -12,6 +12,8 @@ import org.apache.commons.lang3.SystemUtils;
 import org.jivesoftware.smack.SASLAuthentication;
 import org.kaleidoscope.BasicRandomRoutingTable;
 import org.kaleidoscope.RandomRoutingTable;
+import org.lantern.browser.BrowserService;
+import org.lantern.browser.LanternBrowserService;
 import org.lantern.geoip.GeoIpLookupService;
 import org.lantern.http.GoogleOauth2RedirectServlet;
 import org.lantern.http.InteractionServlet;
@@ -33,12 +35,11 @@ import org.lantern.privacy.WindowsLocalCipherProvider;
 import org.lantern.proxy.CertTrackingSslEngineSource;
 import org.lantern.proxy.DefaultProxyTracker;
 import org.lantern.proxy.DispatchingChainedProxyManager;
-import org.lantern.proxy.pt.FlashlightServerManager;
 import org.lantern.proxy.GetModeProxy;
-import org.lantern.proxy.GetModeProxyFilter;
 import org.lantern.proxy.GiveModeProxy;
 import org.lantern.proxy.ProxyTracker;
 import org.lantern.proxy.UdtServerFiveTupleListener;
+import org.lantern.proxy.pt.FlashlightServerManager;
 import org.lantern.state.CometDSyncStrategy;
 import org.lantern.state.DefaultFriendsHandler;
 import org.lantern.state.DefaultModelService;
@@ -58,7 +59,6 @@ import org.lastbamboo.common.portmapping.NatPmpService;
 import org.lastbamboo.common.portmapping.UpnpService;
 import org.littleshoot.commom.xmpp.XmppConnectionRetyStrategyFactory;
 import org.littleshoot.proxy.ChainedProxyManager;
-import org.littleshoot.proxy.HttpFiltersSource;
 import org.littleshoot.proxy.SslEngineSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -110,7 +110,7 @@ public class LanternModule extends AbstractModule {
         bind(SyncStrategy.class).to(CometDSyncStrategy.class);
         bind(SyncService.class);
         //bind(EncryptedFileService.class).to(DefaultEncryptedFileService.class);
-        bind(BrowserService.class).to(ChromeBrowserService.class);
+        bind(BrowserService.class).to(LanternBrowserService.class);
         bind(Model.class).toProvider(ModelIo.class).in(Singleton.class);
 
         bind(ModelService.class).to(DefaultModelService.class);
@@ -195,6 +195,7 @@ public class LanternModule extends AbstractModule {
 
     @Provides @Singleton
     SystemTray provideSystemTray(final BrowserService browserService,
+        final SyncService syncService,
         final Model model) {
         if (SystemUtils.IS_OS_LINUX) {
             try {
@@ -204,7 +205,7 @@ public class LanternModule extends AbstractModule {
                          + "falling back to generic system tray");
             }
         }
-        return new SystemTrayImpl(browserService, model);
+        return new SystemTrayImpl(browserService, syncService, model);
     }
 
     @Provides @Singleton

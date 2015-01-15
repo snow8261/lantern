@@ -31,6 +31,8 @@ public class LanternClientConstants {
     
     public static final String LOG4J_PROPS_PATH = "src/main/resources/log4j.properties";
 
+    public static final String LOG4J_PROPS_NAME = "log4j.properties";
+
     static {
         final Properties prop = new Properties();
         try {
@@ -79,6 +81,8 @@ public class LanternClientConstants {
     public static final long START_TIME = System.currentTimeMillis();
 
     public static final int SYNC_INTERVAL_SECONDS = 6;
+    
+    public static volatile boolean FORCE_FLASHLIGHT = false;
 
     /**
      * Plist file for launchd on OSX.
